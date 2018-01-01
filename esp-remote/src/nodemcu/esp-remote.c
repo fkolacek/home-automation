@@ -54,10 +54,10 @@ void handleClient(){
   Serial.print("Incoming connection from ");
   Serial.println(server.client().remoteIP());
 
-  String response = "{ 'code': 'OK', 'response': 'Code has been sent' }";
+  String response = "{ \"code\": \"OK\", \"response\": \"Code has been sent\" }";
 
   if(server.args() != 2){
-    response = "{ 'code': 'FAIL', 'response': 'Usage: /?vendor=[vendor]&code=[code]' }";
+    response = "{ \"code\": \"FAIL\", \"response\": \"Usage: /?vendor=[vendor]&code=[code]\" }";
   }
   else if(server.args() == 2 && server.arg("code") != "" && server.arg("vendor") != ""){
     String vendor = server.arg("vendor");
@@ -89,11 +89,11 @@ void handleClient(){
       irsend.sendRC6(dcode, 32);
     }
     else{
-      response = "{ 'code': 'FAIL', 'response': 'Invalid vendor (supported are SAMSUNG, NEC, SONY, RC5 and RC6)' }";
+      response = "{ \"code\": \"FAIL\", \"response\": \"Invalid vendor (supported are SAMSUNG, NEC, SONY, RC5 and RC6)\" }";
     }
   }
   else{
-    response = "{ 'code': 'FAIL', 'response': 'Invalid request' }";
+    response = "{ \"code\": \"FAIL\", \"response\": \"Invalid request\" }";
   }
 
   server.send(200, "application/json", response);
