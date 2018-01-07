@@ -8,6 +8,7 @@ unsigned int r = 0;
 unsigned int g = 0;
 unsigned int b = 0;
 unsigned int w = 0;
+unsigned int state = 0;
 
 #define LED_RED 13
 #define LED_GREEN 15
@@ -70,7 +71,27 @@ void handleClient(){
 
   String response = "";
   if(server.args() == 0){
-    response = "{ \"color\": \"FAIL\", \"response\": \"Usage: /?action=[set|get]&r=[red]&g=[green]&b=[blue]&w=[white]\" }";
+    response = "{ \"status\": \"FAIL\", \"response\": \"Usage: /?action=[on|off|set|get]&r=[red]&g=[green]&b=[blue]&w=[white]\" }";
+  }
+  else if(server.arg("action") == "on"){
+    state = 1;
+
+    analogWrite(LED_RED, r);
+    analogWrite(LED_GREEN, g);
+    analogWrite(LED_BLUE, b);
+    analogWrite(LED_WHITE, w);
+
+    response = "{ \"status\": \"OK\", \"response\": \"State has been changed to: 1\" }";
+  }
+  else if(server.arg("action") == "off"){
+    state = 0;
+
+    analogWrite(LED_RED, 0);
+    analogWrite(LED_GREEN, 0);
+    analogWrite(LED_BLUE, 0);
+    analogWrite(LED_WHITE, 0);
+
+    response = "{ \"status\": \"OK\", \"response\": \"State has been changed to: 0\" }";
   }
   else if(server.arg("action") == "set"){
     if(server.arg("r") != "") r = getInRange(server.arg("r").toInt());
@@ -88,12 +109,17 @@ void handleClient(){
     Serial.print(w);
     Serial.println(")");
 
+    if((r+g+b+w) == 0)
+      state = 0;
+    else
+      state = 1;
+
     analogWrite(LED_RED, r);
     analogWrite(LED_GREEN, g);
     analogWrite(LED_BLUE, b);
     analogWrite(LED_WHITE, w);
 
-    response = "{ \"color\": \"OK\", \"response\": \"Color rgbw(";
+    response = "{ \"status\": \"OK\", \"response\": \"Color rgbw(";
     response += String(r) + ",";
     response += String(g) + ",";
     response += String(b) + ",";
@@ -101,18 +127,16 @@ void handleClient(){
     response += ") has been set\" }";
   }
   else if(server.arg("action") == "get"){
-    response = "{ \"color\": \"OK\", \"response\": {";
+    response = "{ \"status\": \"OK\", \"response\": {";
+    response += "\"state\": " + String(state) + ", ";
     response += "\"r\": " + String(r) + ", ";
     response += "\"g\": " + String(g) + ", ";
     response += "\"b\": " + String(b) + ", ";
     response += "\"w\": " + String(w) + " } }";
   }
   else{
-    response = "{ \"color\": \"FAIL\", \"response\": \"Invalid request\" }";
+    response = "{ \"status\": \"FAIL\", \"response\": \"Invalid request\" }";
   }
 
   server.send(200, "application/json", response);
 }
-
-
-
